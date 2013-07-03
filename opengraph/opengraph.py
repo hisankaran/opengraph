@@ -18,13 +18,10 @@ class OpenGraph(dict):
     """
     """
 
-    required_attrs = ['title', 'type', 'image', 'url']
+    required_attrs = ['title', 'type', 'image', 'url',  'description']
     scrape = False
 
-    def __init__(self, url=None, html=None, scrape=False, **kwargs):
-        # If scrape == True, then will try to fetch missing attribtues
-        # from the page's body
-        self.scrape = scrape
+    def __init__(self, url=None, html=None, **kwargs):
         self._url = url
 
         for k in kwargs.keys():
@@ -64,7 +61,7 @@ class OpenGraph(dict):
                 self[og[u'property'][3:]]=og[u'content']
 
         # Couldn't fetch all attrs from og tags, try scraping body
-        if not self.is_valid() and self.scrape:
+        if not self.is_valid():
             for attr in self.required_attrs:
                 if not hasattr(self, attr):
                     try:
@@ -111,6 +108,9 @@ class OpenGraph(dict):
 
     def scrape_title(self, doc):
         return doc.html.head.title.text
+
+    def scrape_description(self, doc):
+        return doc.html.head.find('meta', {"name":'description'}).get('content')
 
     def scrape_type(self, doc):
         return 'other'
